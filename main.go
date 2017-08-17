@@ -28,7 +28,19 @@ func main() {
 		tm.MoveCursor(1, 1)
 
 		position.x += rand.Intn(2*maxSpeed.x) - maxSpeed.x
+		if position.x <= 0 {
+			position.x = 1
+		}
+		if position.x >= 100|tm.PCT {
+			position.x = 100 | tm.PCT - 1
+		}
 		position.y += rand.Intn(2*maxSpeed.y) - maxSpeed.y
+		if position.y <= 0 {
+			position.y = 1
+		}
+		if position.y >= 100|tm.PCT {
+			position.y = 100 | tm.PCT - 1
+		}
 		tm.Print(tm.MoveTo(box.String(), position.x, position.y))
 
 		tm.Flush()
