@@ -4,52 +4,33 @@ import (
 	"math/rand"
 	"time"
 
-	tm "github.com/buger/goterm"
+	termbox "github.com/nsf/termbox-go"
 )
 
 type screen struct {
 	ball *ball
+	size point
 }
 
 type ball struct {
 	position point
 	maxSpeed point
 	speed    point
-	box      *tm.Box
 }
 
 type point struct {
 	x, y int
 }
 
+const coldef = termbox.ColorDefault
+
 func (s *screen) Clear() {
-	tm.Clear()
-	tm.MoveCursor(1, 1)
+	termbox.Clear(coldef, coldef)
 }
 
-func (s *screen) Paint() {
-	tm.Print(tm.MoveTo(s.ball.String(), s.ball.position.x, s.ball.position.y))
-	tm.Flush()
-}
-
-func newRandomPosition(reference, maxSpeed point) point {
-	newPosition := point{
-		x: reference.x + rand.Intn(2*maxSpeed.x) - maxSpeed.x,
-		y: reference.y + rand.Intn(2*maxSpeed.y) - maxSpeed.y,
-	}
-	if newPosition.x <= 0 {
-		newPosition.x = 1
-	}
-	if newPosition.x >= 100|tm.PCT {
-		newPosition.x = 100 | tm.PCT - 1
-	}
-	if newPosition.y <= 0 {
-		newPosition.y = 1
-	}
-	if newPosition.y >= 100|tm.PCT {
-		newPosition.y = 100 | tm.PCT - 1
-	}
-	return newPosition
+func (s *screen) Render() {
+	tbprint(s.ball.position.x, s.ball.position.y, coldef, coldef, s.ball.String())
+	termbox.Flush()
 }
 
 func (b *ball) Move() {
@@ -64,13 +45,17 @@ func (b *ball) String() string {
 func NewScreen(b *ball) *screen {
 	return &screen{
 		ball: b,
+		size: point{
+			x: 100,
+			y: 20,
+		},
 	}
 }
 
 func NewBall() *ball {
 	startingPoint := point{
-		x: 40 | tm.PCT,
-		y: 40 | tm.PCT,
+		x: 50,
+		y: 10,
 	}
 	maxSpeed := point{
 		x: 4,
@@ -84,21 +69,37 @@ func NewBall() *ball {
 		maxSpeed: maxSpeed,
 		position: startingPoint,
 		speed:    speed,
-		box:      tm.NewBox(2, 2, 0),
 	}
 }
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
+
+	err := termbox.Init()
+	if err != nil {
+		panic(err)
+	}
+	defer termbox.Close()
+	termbox.SetInputMode(termbox.InputAlt)
+
+	time.Sleep(2 * time.Second)
+
 	ball := NewBall()
 	screen := NewScreen(ball)
 
-	for {
+	for i := 0; i < 10; i++ {
 		screen.Clear()
 
 		ball.Move()
-		screen.Paint()
+		screen.Render()
 
 		time.Sleep(300 * time.Millisecond)
+	}
+}
+
+func tbprint(x, y int, fg, bg termbox.Attribute, msg string) {
+	for _, c := range msg {
+		termbox.SetCell(x, y, c, fg, bg)
+		x++
 	}
 }
