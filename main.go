@@ -27,7 +27,7 @@ func (s *screen) Clear() {
 }
 
 func (s *screen) Paint() {
-	tm.Print(tm.MoveTo(s.ball.box.String(), s.ball.position.x, s.ball.position.y))
+	tm.Print(tm.MoveTo(s.ball.String(), s.ball.position.x, s.ball.position.y))
 	tm.Flush()
 }
 
@@ -46,6 +46,10 @@ func (b *ball) Move() {
 	if b.position.y >= 100|tm.PCT {
 		b.position.y = 100 | tm.PCT - 1
 	}
+}
+
+func (b *ball) String() string {
+	return "o"
 }
 
 func NewScreen(b *ball) *screen {
