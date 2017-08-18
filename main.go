@@ -36,6 +36,12 @@ func (s *screen) Render() {
 func (b *ball) Move() {
 	b.position.x += b.speed.x
 	b.position.y += b.speed.y
+	if b.position.x <= 0 || b.position.x >= 100 {
+		b.speed.x *= -1
+	}
+	if b.position.y <= 0 || b.position.y >= 20 {
+		b.speed.y *= -1
+	}
 }
 
 func (b *ball) String() string {
@@ -87,7 +93,7 @@ func main() {
 	ball := NewBall()
 	screen := NewScreen(ball)
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 30; i++ {
 		screen.Clear()
 
 		ball.Move()
