@@ -23,23 +23,39 @@ type point struct {
 }
 
 const coldef = termbox.ColorDefault
+const SCREEN_SIZE_X = 100
+const SCREEN_SIZE_Y = 20
 
 func (s *screen) Clear() {
 	termbox.Clear(coldef, coldef)
 }
 
 func (s *screen) Render() {
+	s.drawBorder()
 	tbprint(s.ball.position.x, s.ball.position.y, coldef, coldef, s.ball.String())
 	termbox.Flush()
+}
+
+func (s *screen) drawBorder() {
+	hborder := ""
+	for i := 0; i < s.size.x; i++ {
+		hborder += "-"
+	}
+	tbprint(0, 0, coldef, coldef, hborder)
+	tbprint(0, s.size.y-1, coldef, coldef, hborder)
+	for i := 1; i < s.size.y-1; i++ {
+		tbprint(0, i, coldef, coldef, "|")
+		tbprint(s.size.x-1, i, coldef, coldef, "|")
+	}
 }
 
 func (b *ball) Move() {
 	b.position.x += b.speed.x
 	b.position.y += b.speed.y
-	if b.position.x <= 0 || b.position.x >= 100 {
+	if b.position.x <= 1 || b.position.x >= SCREEN_SIZE_X-2 {
 		b.speed.x *= -1
 	}
-	if b.position.y <= 0 || b.position.y >= 20 {
+	if b.position.y <= 1 || b.position.y >= SCREEN_SIZE_Y-2 {
 		b.speed.y *= -1
 	}
 }
@@ -52,8 +68,8 @@ func NewScreen(b *ball) *screen {
 	return &screen{
 		ball: b,
 		size: point{
-			x: 100,
-			y: 20,
+			x: SCREEN_SIZE_X,
+			y: SCREEN_SIZE_Y,
 		},
 	}
 }
