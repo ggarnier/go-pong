@@ -14,6 +14,7 @@ type screen struct {
 type ball struct {
 	position point
 	maxSpeed point
+	speed    point
 	box      *tm.Box
 }
 
@@ -31,21 +32,29 @@ func (s *screen) Paint() {
 	tm.Flush()
 }
 
+func newRandomPosition(reference, maxSpeed point) point {
+	newPosition := point{
+		x: reference.x + rand.Intn(2*maxSpeed.x) - maxSpeed.x,
+		y: reference.y + rand.Intn(2*maxSpeed.y) - maxSpeed.y,
+	}
+	if newPosition.x <= 0 {
+		newPosition.x = 1
+	}
+	if newPosition.x >= 100|tm.PCT {
+		newPosition.x = 100 | tm.PCT - 1
+	}
+	if newPosition.y <= 0 {
+		newPosition.y = 1
+	}
+	if newPosition.y >= 100|tm.PCT {
+		newPosition.y = 100 | tm.PCT - 1
+	}
+	return newPosition
+}
+
 func (b *ball) Move() {
-	b.position.x += rand.Intn(2*b.maxSpeed.x) - b.maxSpeed.x
-	if b.position.x <= 0 {
-		b.position.x = 1
-	}
-	if b.position.x >= 100|tm.PCT {
-		b.position.x = 100 | tm.PCT - 1
-	}
-	b.position.y += rand.Intn(2*b.maxSpeed.y) - b.maxSpeed.y
-	if b.position.y <= 0 {
-		b.position.y = 1
-	}
-	if b.position.y >= 100|tm.PCT {
-		b.position.y = 100 | tm.PCT - 1
-	}
+	b.position.x += b.speed.x
+	b.position.y += b.speed.y
 }
 
 func (b *ball) String() string {
@@ -59,29 +68,36 @@ func NewScreen(b *ball) *screen {
 }
 
 func NewBall() *ball {
+	startingPoint := point{
+		x: 40 | tm.PCT,
+		y: 40 | tm.PCT,
+	}
+	maxSpeed := point{
+		x: 4,
+		y: 2,
+	}
+	speed := point{
+		x: rand.Intn(maxSpeed.x+1) + 1,
+		y: rand.Intn(maxSpeed.y+1) + 1,
+	}
 	return &ball{
-		maxSpeed: point{
-			x: 6,
-			y: 2,
-		},
-		position: point{
-			x: 40 | tm.PCT,
-			y: 40 | tm.PCT,
-		},
-		box: tm.NewBox(2, 2, 0),
+		maxSpeed: maxSpeed,
+		position: startingPoint,
+		speed:    speed,
+		box:      tm.NewBox(2, 2, 0),
 	}
 }
 
 func main() {
 	rand.Seed(time.Now().UnixNano())
-	b := NewBall()
-	s := NewScreen(b)
+	ball := NewBall()
+	screen := NewScreen(ball)
 
 	for {
-		s.Clear()
+		screen.Clear()
 
-		b.Move()
-		s.Paint()
+		ball.Move()
+		screen.Paint()
 
 		time.Sleep(300 * time.Millisecond)
 	}
